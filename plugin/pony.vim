@@ -23,6 +23,8 @@ function! s:Completion(ArgLead, CmdLine, CursorPos)
     let s:filename = 'tests.py'
   elseif match(a:CmdLine, 'Dmodels') >= 0
     let s:filename = 'models.py'
+  elseif match(a:CmdLine, 'Dviews') >= 0
+    let s:filename = 'views.py'
   elseif match(a:CmdLine, 'Durls') >= 0
     let s:filename = 'urls.py'
   endif
@@ -59,5 +61,6 @@ endfunction
 command! -nargs=? -complete=customlist,s:Completion Dadmin :call s:DjangoGoto('<args>', 'admin')
 command! -nargs=? -complete=customlist,s:Completion Dmodels :call s:DjangoGoto('<args>', 'models')
 command! -nargs=? -complete=customlist,s:Completion Dtests :call s:DjangoGoto('<args>', 'tests')
+command! -nargs=? -complete=customlist,s:Completion Dviews :call s:DjangoGoto('<args>', 'views')
 command! -nargs=? -complete=customlist,s:Completion Durls :call s:DjangoGoto('<args>', 'urls')
 command! -nargs=+ -bar Dmanage :call s:DjangoManage('<args>')
