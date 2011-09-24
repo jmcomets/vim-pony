@@ -9,8 +9,8 @@ endif
 let g:loaded_pony = 1
 
 function! s:ProjectExists()
-  if !filereadable('settings.py')
-    echo 'settings.py could not be found.'
+  if !filereadable('settings.py') && !exists("$DJANGO_SETTINGS_MODULE")
+    echo 'settings could not be found.'
     return 0
   endif
   return 1
