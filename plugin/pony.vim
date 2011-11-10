@@ -1,7 +1,6 @@
 " Vim plugin for working with Django projects.
-" Last Change: Seg Abr 25 12:21:34 BRT 2011
-" Maintainer: Rainer Borene <me@rainerborene.com>
-" License: Licensed under the same terms as Vim.
+" Author: Rainer Borene <me@rainerborene.com>
+" Licensed under the same terms as Vim.
 
 if exists('g:loaded_pony')
   finish

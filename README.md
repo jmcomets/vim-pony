@@ -10,8 +10,4 @@ a submodule instead.
 
     $ git submodule add git://github.com/rainerborene/vim-pony.git ~/.vim/bundle/vim-pony
 
-### Documentation
-
-Still work in progress.
-
 ![Pony powered](http://media.djangopony.com/img/small/badge.png)
