@@ -39,20 +39,21 @@ endfunction
 " Completion for DjangoGoto
 function! s:DjangoGoToComplete(ArgLead, CmdLine, CursorPos)
   " Check that there is a Goto defined for the given command
-  let s:filename_index = match(s:goto_possible_keys, "^" . a:CmdLine . "\w+")
-  if s:filename_index == -1
+  let l:cmd_name = split(split(a:CmdLine, ' ')[0], g:pony_prefix)[0]
+  let l:filename_index = index(s:goto_possible_keys, l:cmd_name)
+  if l:filename_index == -1
     return []
   endif
-  let s:filename = s:goto_possible_keys[s:filename_index]
+  let l:filename = s:goto_possible_keys[l:filename_index] . '.py'
 
   " Using find command, find folders holding python
   " files at "s:goto_complete_dict[s:filename]"
-  let s:findcmd = "find */ -type f -name "
-        \ . shellescape(s:filename)
+  let l:findcmd = "find */ -type f -name "
+        \ . shellescape(l:filename)
         \ . " | grep -oE ^[^/]+ | grep "
         \ . shellescape(a:ArgLead)
-  let s:folders = system(s:findcmd)
-  return split(s:folders, "\n")
+  let l:folders = system(l:findcmd)
+  return split(l:folders, "\n")
 endfunction
 
 function! s:DjangoGoto(app_label, name)
@@ -70,6 +71,11 @@ endfunction
 let s:manage_cmd = s:python_cmd . " " . g:pony_manage_filename
 
 function! s:DjangoManageComplete(ArgLead, CmdLine, CursorPos)
+  if !filereadable(g:pony_manage_filename)
+    return []
+  endif
+
+  " Actually list commands
   let l:list_cmd = s:manage_cmd 
         \ . " help --commands | grep "
         \ . shellescape(a:ArgLead)
