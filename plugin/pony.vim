@@ -4,11 +4,10 @@
 "
 " Maintainer: Jean-Marie Comets <jean.marie.comets@gmail.com>
 
-" TODO uncomment
-"if exists('g:loaded_pony')
-  "finish
-"endif
-"let g:loaded_pony = 1
+if exists('g:loaded_pony')
+  finish
+endif
+let g:loaded_pony = 1
 
 " Refactored to regroup this, maybe checks will be made or settings
 " will be added (as a g:pony_python_cmd variable ?)
@@ -33,10 +32,14 @@ let g:pony_prefix = 'D'
 " Completion for DjangoGoto
 function! s:GotoCompletion(ArgLead, CmdLine, CursorPos)
   " Check that there is a Goto defined for the given command
-  let s:filename_index = match(s:goto_possible_keys, '^D' . a:CmdLine . '\w+')
-  if s:filenames_index == -1
+  let s:filename_index = match(s:goto_possible_keys, '^' . a:CmdLine . '\w+')
+  if s:filename_index == -1
     return []
   endif
+  let s:filename = s:goto_possible_keys[]
+
+  " Using find command, find folders holding python
+  " files at "s:goto_complete_dict[s:filename]"
   let s:findcmd = 'find */ -type f -name '
         \ . shellescape(s:filename)
         \ . ' | grep -oE ^[^/]+ | grep '
@@ -68,13 +71,13 @@ function! s:ManageCompletion(ArgLead, CmdLine, CursorPos)
 endfunction
 
 " Set this flag to allow Pony to display colors when
-" using the "Dmanage" commmands
+" using the "manage" commmands
 let g:pony_display_colors = 1
 
 function! s:DjangoManage(arguments)
   let l:cmd = '!'
   if !g:pony_display_colors
-    " Dont display colors
+    " Don't display colors
     let l:cmd .= 'export DJANGO_COLORS=nocolor &&'
   end
   exe l:cmd . ' ' . s:manage_cmd . ' ' . a:arguments
@@ -83,7 +86,7 @@ endfunction
 " Setup DjangoGoto commands
 for goto_key in s:goto_possible_keys
   execute "command! -nargs=? -complete=customlist,s:GotoCompletion "
-        \ . g:pony_prefix . " " . goto_key
+        \ . g:pony_prefix . goto_key
         \ . " :call s:DjangoGoto('<args>', '" . goto_key . "')"
 endfor
 
