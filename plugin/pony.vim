@@ -20,7 +20,7 @@ let s:goto_complete_dict = {
       \ 'settings' : 'settings.py',
       \ 'tests'    : 'tests.py',
       \ 'urls'     : 'urls.py',
-      \ 'view'     : 'view.py'
+      \ 'views'     : 'views.py'
       \ }
 
 " Available commands for DjangoGoTo
