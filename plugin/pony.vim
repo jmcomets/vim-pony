@@ -9,6 +9,11 @@ if exists('g:loaded_pony')
 endif
 let g:loaded_pony = 1
 
+" Test that the CWD is a Django project
+function! s:DjangoProjectInCWD()
+  " TODO
+endfunction
+
 " Refactored to regroup this, maybe checks will be made or settings
 " will be added (as a g:pony_python_cmd variable ?)
 let s:python_cmd = 'python'
@@ -30,13 +35,13 @@ let s:goto_possible_keys = keys(s:goto_complete_dict)
 let g:pony_prefix = 'D'
 
 " Completion for DjangoGoto
-function! s:GotoCompletion(ArgLead, CmdLine, CursorPos)
+function! s:DjangoGoToComplete(ArgLead, CmdLine, CursorPos)
   " Check that there is a Goto defined for the given command
   let s:filename_index = match(s:goto_possible_keys, '^' . a:CmdLine . '\w+')
   if s:filename_index == -1
     return []
   endif
-  let s:filename = s:goto_possible_keys[]
+  let s:filename = s:goto_possible_keys[s:filename_index]
 
   " Using find command, find folders holding python
   " files at "s:goto_complete_dict[s:filename]"
@@ -62,7 +67,7 @@ endfunction
 " Same as python_cmd refactoring
 let s:manage_cmd = s:python_cmd . ' manage.py'
 
-function! s:ManageCompletion(ArgLead, CmdLine, CursorPos)
+function! s:DjangoManageComplete(ArgLead, CmdLine, CursorPos)
   let l:list_cmd = s:manage_cmd 
         \ . ' help --commands | grep '
         \ . shellescape(a:ArgLead)
@@ -85,13 +90,13 @@ endfunction
 
 " Setup DjangoGoto commands
 for goto_key in s:goto_possible_keys
-  execute "command! -nargs=? -complete=customlist,s:GotoCompletion "
+  execute "command! -nargs=? -complete=customlist,s:DjangoGoToComplete "
         \ . g:pony_prefix . goto_key
         \ . " :call s:DjangoGoto('<args>', '" . goto_key . "')"
 endfor
 
 " Manage and its shortcuts
-execute "command! -nargs=? -complete=customlist,s:ManageCompletion "
+execute "command! -nargs=? -complete=customlist,s:DjangoManageComplete "
       \ . g:pony_prefix . "manage :call s:DjangoManage('<args>')"
 " dictionary for configuration of the manage shortcuts
 let s:manage_shortcuts = {
