@@ -1,65 +1,111 @@
 " Vim plugin for working with Django projects.
 " Author: Rainer Borene <me@rainerborene.com>
 " Licensed under the same terms as Vim.
+"
+" Maintainer: Jean-Marie Comets <jean.marie.comets@gmail.com>
 
-if exists('g:loaded_pony')
-  finish
-endif
-let g:loaded_pony = 1
+" TODO uncomment
+"if exists('g:loaded_pony')
+  "finish
+"endif
+"let g:loaded_pony = 1
 
-function! s:ProjectExists()
-  if !filereadable('settings.py') && !exists("$DJANGO_SETTINGS_MODULE")
-    echo 'settings could not be found.'
-    return 0
+" Refactored to regroup this, maybe checks will be made or settings
+" will be added (as a g:pony_python_cmd variable ?)
+let s:python_cmd = 'python'
+
+" Dictionary containing mapping from command to possible files
+let s:goto_complete_dict = {
+      \ 'admin'    : 'admin.py',
+      \ 'models'   : 'models.py',
+      \ 'settings' : 'settings.py',
+      \ 'tests'    : 'tests.py',
+      \ 'urls'     : 'urls.py',
+      \ 'view'     : 'view.py'
+      \ }
+
+" Available commands for DjangoGoTo
+let s:goto_possible_keys = keys(s:goto_complete_dict)
+
+" Prefix for Pony commands
+let g:pony_prefix = 'D'
+
+" Completion for DjangoGoto
+function! s:GotoCompletion(ArgLead, CmdLine, CursorPos)
+  " Check that there is a Goto defined for the given command
+  let s:filename_index = match(s:goto_possible_keys, '^D' . a:CmdLine . '\w+')
+  if s:filenames_index == -1
+    return []
   endif
-  return 1
-endfunction
-
-function! s:Completion(ArgLead, CmdLine, CursorPos)
-  if match(a:CmdLine, 'Dadmin') >= 0
-    let s:filename = 'admin.py'
-  elseif match(a:CmdLine, 'Dtests') >= 0
-    let s:filename = 'tests.py'
-  elseif match(a:CmdLine, 'Dmodels') >= 0
-    let s:filename = 'models.py'
-  elseif match(a:CmdLine, 'Dviews') >= 0
-    let s:filename = 'views.py'
-  elseif match(a:CmdLine, 'Durls') >= 0
-    let s:filename = 'urls.py'
-  endif
-  let s:findcmd = printf('find */ -type f -name %s | grep -oE ^[^/]+', s:filename)
+  let s:findcmd = 'find */ -type f -name '
+        \ . shellescape(s:filename)
+        \ . ' | grep -oE ^[^/]+ | grep '
+        \ . shellescape(a:ArgLead)
   let s:folders = system(s:findcmd)
   return split(s:folders, '\n')
 endfunction
 
 function! s:DjangoGoto(app_label, name)
-  if !s:ProjectExists()
-    return
-  endif
   if len(a:app_label) > 0
-    let s:destiny = getcwd() . '/' . a:app_label . '/' . a:name . '.py'
+    let l:destiny = getcwd() . '/' . a:app_label . '/' . a:name . '.py'
   else
-    let s:destiny = expand('%:p:h') . '/' . a:name . '.py'
+    let l:destiny = expand('%:p:h') . '/' . a:name . '.py'
   endif
-  if filereadable(s:destiny)
-    exec 'edit ' . s:destiny
+  if filereadable(l:destiny)
+    exec 'edit ' . l:destiny
   endif
 endfunction
+
+" Same as python_cmd refactoring
+let s:manage_cmd = s:python_cmd . ' manage.py'
+
+function! s:ManageCompletion(ArgLead, CmdLine, CursorPos)
+  let l:list_cmd = s:manage_cmd 
+        \ . ' help --commands | grep '
+        \ . shellescape(a:ArgLead)
+  let l:commands = system(l:list_cmd)
+  return split(l:commands, '\n')
+endfunction
+
+" Set this flag to allow Pony to display colors when
+" using the "Dmanage" commmands
+let g:pony_display_colors = 1
 
 function! s:DjangoManage(arguments)
-  if !s:ProjectExists()
-    return
-  endif
-  exe '!export DJANGO_COLORS=nocolor && python manage.py ' . a:arguments
+  let l:cmd = '!'
+  if !g:pony_display_colors
+    " Dont display colors
+    let l:cmd .= 'export DJANGO_COLORS=nocolor &&'
+  end
+  exe l:cmd . ' ' . s:manage_cmd . ' ' . a:arguments
 endfunction
 
-function! s:DjangoRuntests(app_label)
-  s:DjangoManage('test ' . a:app_label)
-endfunction
+" Setup DjangoGoto commands
+for goto_key in s:goto_possible_keys
+  execute "command! -nargs=? -complete=customlist,s:GotoCompletion "
+        \ . g:pony_prefix . " " . goto_key
+        \ . " :call s:DjangoGoto('<args>', '" . goto_key . "')"
+endfor
 
-command! -nargs=? -complete=customlist,s:Completion Dadmin :call s:DjangoGoto('<args>', 'admin')
-command! -nargs=? -complete=customlist,s:Completion Dmodels :call s:DjangoGoto('<args>', 'models')
-command! -nargs=? -complete=customlist,s:Completion Dtests :call s:DjangoGoto('<args>', 'tests')
-command! -nargs=? -complete=customlist,s:Completion Dviews :call s:DjangoGoto('<args>', 'views')
-command! -nargs=? -complete=customlist,s:Completion Durls :call s:DjangoGoto('<args>', 'urls')
-command! -nargs=+ -bar Dmanage :call s:DjangoManage('<args>')
+" Manage and its shortcuts
+execute "command! -nargs=? -complete=customlist,s:ManageCompletion "
+      \ . g:pony_prefix . "manage :call s:DjangoManage('<args>')"
+" dictionary for configuration of the manage shortcuts
+let s:manage_shortcuts = {
+      \ 'dbshell'   : 'dbshell',
+      \ 'runserver' : 'runserver',
+      \ 'syncdb'    : 'syncdb',
+      \ 'shell'     : 'shell'
+      \ }
+
+for pair in items(s:manage_shortcuts)
+  let shortcut = pair[0]
+  let shortcut_arg = pair[1]
+  execute "command! -nargs=0 "
+        \ . g:pony_prefix . shortcut
+        \ . " :call s:DjangoManage('" . shortcut_arg . "')"
+endfor
+unlet shortcut
+unlet shortcut_arg
+
+" vim: ai et sw=2 sts=2
