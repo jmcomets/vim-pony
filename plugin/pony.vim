@@ -11,6 +11,17 @@ let g:loaded_pony = 1
 
 " Configuration for "manage" script name
 let g:pony_manage_filename = "manage.py"
+" function to wrap the check on this file
+function! s:ManageExists()
+  return filereadable(g:pony_manage_filename)
+endfunction
+
+" Script error function, preferred to echoerr
+function! s:Error(msg)
+  echohl WarningMsg
+  echo a:msg
+  echohl None
+endfunction
 
 " Refactored to regroup this, maybe checks will be made or settings
 " will be added (as a g:pony_python_cmd variable ?)
@@ -39,12 +50,13 @@ endfunction
 " Completion for DjangoGoto
 function! s:DjangoGoToComplete(ArgLead, CmdLine, CursorPos)
   " Check that there is a Goto defined for the given command
-  let l:cmd_name = split(split(a:CmdLine, ' ')[0], g:pony_prefix)[0]
-  let l:filename_index = index(s:goto_possible_keys, l:cmd_name)
-  if l:filename_index == -1
+  let l:cmd_name = split(split(a:CmdLine, " ")[0], g:pony_prefix)[0]
+  let l:goto_key_index = match(s:goto_possible_keys, l:cmd_name)
+  if l:goto_key_index == -1
     return []
   endif
-  let l:filename = s:goto_possible_keys[l:filename_index] . '.py'
+  let l:goto_key = s:goto_possible_keys[l:goto_key_index]
+  let l:filename = s:goto_complete_dict[l:goto_key]
 
   " Using find command, find folders holding python
   " files at "s:goto_complete_dict[s:filename]"
@@ -57,13 +69,18 @@ function! s:DjangoGoToComplete(ArgLead, CmdLine, CursorPos)
 endfunction
 
 function! s:DjangoGoto(app_label, name)
+  " Build filename
   if len(a:app_label) > 0
     let l:destiny = getcwd() . "/" . a:app_label . "/" . a:name . ".py"
   else
-    let l:destiny = expand("%:p:h") . '/' . a:name . ".py"
+    let l:destiny = expand("%:p:h") . "/" . a:name . ".py"
   endif
+
+  " Edit file if it exists
   if filereadable(l:destiny)
-    exec 'edit ' . l:destiny
+    execute "edit " . l:destiny
+  else
+    call s:Error("File " . l:destiny . " does not exists")
   endif
 endfunction
 
@@ -71,7 +88,8 @@ endfunction
 let s:manage_cmd = s:python_cmd . " " . g:pony_manage_filename
 
 function! s:DjangoManageComplete(ArgLead, CmdLine, CursorPos)
-  if !filereadable(g:pony_manage_filename)
+  " Check before continuing
+  if !s:ManageExists()
     return []
   endif
 
@@ -88,6 +106,12 @@ endfunction
 let g:pony_display_colors = 1
 
 function! s:DjangoManage(arguments)
+  " Check before continuing
+  if !s:ManageExists()
+    return
+  endif
+
+  " Build manage command from arguments
   let l:cmd = "!"
   if !g:pony_display_colors
     " Don't display colors
