@@ -18,7 +18,7 @@ endfunction
 
 " Script error function, preferred to echoerr
 function! s:Error(msg)
-  echohl WarningMsg
+  echohl ErrorMsg
   echo a:msg
   echohl None
 endfunction
@@ -49,6 +49,11 @@ endfunction
 
 " Completion for DjangoGoto
 function! s:DjangoGoToComplete(ArgLead, CmdLine, CursorPos)
+  " Check before continuing
+  if !s:ManageExists()
+    return []
+  endif
+
   " Check that there is a Goto defined for the given command
   let l:cmd_name = split(split(a:CmdLine, " ")[0], g:pony_prefix)[0]
   let l:goto_key_index = match(s:goto_possible_keys, l:cmd_name)
@@ -69,18 +74,31 @@ function! s:DjangoGoToComplete(ArgLead, CmdLine, CursorPos)
 endfunction
 
 function! s:DjangoGoto(app_label, name)
-  " Build filename
+  " Build app directory
   if len(a:app_label) > 0
-    let l:destiny = getcwd() . "/" . a:app_label . "/" . a:name . ".py"
+    let l:real_app_label = a:app_label
+    if !filereadable(l:real_app_label)
+      let l:cmd = "ls -d " . l:real_app_label . "*"
+      let l:app_label_candidates = split(system(l:cmd))
+      if len(l:app_label_candidates) == 0
+        s:Error("File " . a:app_label . " doesn't have any candidates in CWD")
+        return
+      endif
+      let l:real_app_label = l:app_label_candidates[0]
+    endif
+    let l:app_dir = getcwd() . "/" . l:real_app_label
   else
-    let l:destiny = expand("%:p:h") . "/" . a:name . ".py"
+    let l:app_dir = expand("%:p:h")
   endif
 
+  " Build filename
+  let l:filename = l:app_dir . "/" . s:goto_complete_dict[a:name]
+
   " Edit file if it exists
-  if filereadable(l:destiny)
-    execute "edit " . l:destiny
+  if filereadable(l:filename)
+    execute "edit " . l:filename
   else
-    call s:Error("File " . l:destiny . " does not exists")
+    call s:Error("File " . l:filename . " does not exists")
   endif
 endfunction
 
