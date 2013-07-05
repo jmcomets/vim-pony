@@ -5,7 +5,7 @@
 " Maintainer: Jean-Marie Comets <jean.marie.comets@gmail.com>
 
 if exists("g:loaded_pony")
-  "finish
+  finish
 endif
 let g:loaded_pony = 1
 
@@ -62,8 +62,8 @@ function! s:DjangoGoToComplete(ArgLead, CmdLine, CursorPos)
   " files at "s:goto_complete_dict[s:filename]"
   let l:findcmd = "find */ -type f -name "
         \ . shellescape(l:filename)
-        \ . " | grep -oE ^[^/]+ | grep "
-        \ . shellescape(a:ArgLead)
+        \ . " | grep -oE '^[^/]+'"
+        \ . " | grep " . shellescape(a:ArgLead)
   let l:folders = system(l:findcmd)
   return split(l:folders, "\n")
 endfunction
@@ -95,8 +95,8 @@ function! s:DjangoManageComplete(ArgLead, CmdLine, CursorPos)
 
   " Actually list commands
   let l:list_cmd = s:manage_cmd 
-        \ . " help --commands | grep "
-        \ . shellescape(a:ArgLead)
+        \ . " help --commands"
+        \ . " | grep " . shellescape(a:ArgLead)
   let l:commands = system(l:list_cmd)
   return split(l:commands, "\n")
 endfunction
@@ -108,6 +108,7 @@ let g:pony_display_colors = 1
 function! s:DjangoManage(arguments)
   " Check before continuing
   if !s:ManageExists()
+    call s:Error("File '" . g:pony_manage_filename . "' does not exists in CWD")
     return
   endif
 
@@ -117,7 +118,7 @@ function! s:DjangoManage(arguments)
     " Don't display colors
     let l:cmd .= "export DJANGO_COLORS=nocolor &&"
   end
-  exe l:cmd . " " . s:manage_cmd . " " . a:arguments
+  execute l:cmd . " " . s:manage_cmd . " " . a:arguments
 endfunction
 
 " Setup DjangoGoto commands
