@@ -67,7 +67,7 @@ function! s:DjangoGoToComplete(ArgLead, CmdLine, CursorPos)
   " files at "s:goto_complete_dict[s:filename]"
   let l:findcmd = "find */ -type f -name "
         \ . shellescape(l:filename)
-        \ . " | grep -oE '^[^/]+'"
+        \ . " | sed 's/\\([^\\/]*\\)\\/" . escape(l:filename, './') . "/\\1/g'"
         \ . " | grep " . shellescape(a:ArgLead)
   let l:folders = system(l:findcmd)
   return split(l:folders, "\n")
