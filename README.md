@@ -2,12 +2,50 @@
 
 Pony power for working with Django projects in Vim.
 
-### Installation
-
-Simply copy `plugin/pony.vim` to the appropriate directory in ~/.vim folder. 
-If you're using Pathogen and Git you might want to track this repository as 
-a submodule instead.
-
-    $ git submodule add git://github.com/rainerborene/vim-pony.git ~/.vim/bundle/vim-pony
-
 ![Pony powered](http://media.djangopony.com/img/small/badge.png)
+
+## Installation
+
+For those using [pathogen](https://github.com/tpope/vim-pathogen),
+simply copy/clone the entire repo in your ~/.vim/bundle.
+
+Otherwise, copy `plugin/pony.vim` to your ~/.vim/plugin folder.
+
+## Jump commands
+
+Some basic commands are available to jump to commonly used files in Django:
+
+- Dadmin: admin.py
+- Dmodels: models.py
+- Dsettings: settings.py
+- Dtests: tests.py
+- Durls: urls.py
+- Dviews: views.py
+
+All these *jump commands* take an optional "app" argument, and will
+jump accordingly to the file in that app. Defaults to the current directory.
+
+Example :
+
+    :Dviews app " opens app/views.py
+    :Dmodels " opens app/models.py
+
+## Managing commands
+
+The manage.py utility script is available via `:Dmanage`.
+Note that any command involving the manage.py utility must be run
+from that directory.
+
+Shortcuts are available for a few common manage.py commands:
+
+- Drunserver : manage.py runserver
+- Dsyncdb : manage.py syncdb
+- Dshell : manage.py shell
+- Ddbshell : manage.py dbshell
+
+Tip: I use `:Dr` for runserver, `:Dsy` for syncdb and `:Dsh` for shell.
+
+## Credits
+
+- [Rainer Borene](https://github.com/rainerborene), the initial contributor
+- [Jean-Marie Comets](https://github.com/jmcomets), current maintainer
