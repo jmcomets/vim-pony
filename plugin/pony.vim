@@ -10,7 +10,10 @@ endif
 let g:loaded_pony = 1
 
 " Configuration for "manage" script name
-let g:pony_manage_filename = "manage.py"
+if !exists('g:pony_manage_filename')
+  let g:pony_manage_filename = findfile("manage.py", ".;")
+endif
+
 " function to wrap the check on this file
 function! s:ManageExists()
   return filereadable(g:pony_manage_filename)
