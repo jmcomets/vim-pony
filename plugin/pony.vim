@@ -105,8 +105,11 @@ function! s:DjangoGoto(app_label, name)
   endif
 endfunction
 
-" Same as python_cmd refactoring
-let s:manage_cmd = s:python_cmd . " " . g:pony_manage_filename
+" Return manage cmd via a function, because g:pony_manage_filename might
+" change.
+function! s:manage_cmd()
+  return s:python_cmd . " " . g:pony_manage_filename
+endfunction
 
 function! s:DjangoManageComplete(ArgLead, CmdLine, CursorPos)
   " Check before continuing
@@ -115,7 +118,7 @@ function! s:DjangoManageComplete(ArgLead, CmdLine, CursorPos)
   endif
 
   " Actually list commands
-  let l:list_cmd = s:manage_cmd 
+  let l:list_cmd = s:manage_cmd()
         \ . " help --commands"
         \ . " | grep " . shellescape(a:ArgLead)
   let l:commands = system(l:list_cmd)
@@ -139,7 +142,7 @@ function! s:DjangoManage(arguments)
     " Don't display colors
     let l:cmd .= "export DJANGO_COLORS=nocolor &&"
   end
-  execute l:cmd . " " . s:manage_cmd . " " . a:arguments
+  execute l:cmd . " " . s:manage_cmd() . " " . a:arguments
 endfunction
 
 " Setup DjangoGoto commands
