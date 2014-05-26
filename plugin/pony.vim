@@ -26,9 +26,8 @@ function! s:Error(msg)
   echohl None
 endfunction
 
-" Refactored to regroup this, maybe checks will be made or settings
-" will be added (as a g:pony_python_cmd variable ?)
-let s:python_cmd = "python"
+" Specify command to apply to the manage.py script (default: python)
+let g:pony_python_cmd = "python"
 
 " Dictionary containing mapping from command to possible files
 let s:goto_complete_dict = {
@@ -108,7 +107,7 @@ endfunction
 " Return manage cmd via a function, because g:pony_manage_filename might
 " change.
 function! s:manage_cmd()
-  return s:python_cmd . " " . g:pony_manage_filename
+  return g:pony_python_cmd . " " . g:pony_manage_filename
 endfunction
 
 function! s:DjangoManageComplete(ArgLead, CmdLine, CursorPos)

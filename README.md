@@ -45,6 +45,13 @@ Shortcuts are available for a few common manage.py commands:
 
 Tip: I use `:Dr` for runserver, `:Dsy` for syncdb and `:Dsh` for shell.
 
+## Configuration
+
+    g:pony_prefix           prefix to all Pony's commands (default: "D")
+    g:pony_display_colors   flag indicating if the manage.py should output colors (default: 1)
+    g:pony_manage_filename  filename of the manage.py script (default: manage.py)
+    g:pony_python_cmd       exact command to run on the manage.py script (default: python)
+
 ## Credits
 
 - [Rainer Borene](https://github.com/rainerborene), the initial contributor
