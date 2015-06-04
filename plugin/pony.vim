@@ -46,7 +46,9 @@ let s:goto_possible_keys = keys(s:goto_complete_dict)
 let g:pony_prefix = "D"
 
 " Wether the file will open in new tab or not
-let g:pony_open_in_new_tab = 0
+if !exists("g:pony_open_in_new_tab")
+  let g:pony_open_in_new_tab = 0
+endif
 
 " helper for making command names, encapsulating the command format
 function! s:RealCommandName(CommandName)
