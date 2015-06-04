@@ -44,6 +44,10 @@ let s:goto_possible_keys = keys(s:goto_complete_dict)
 
 " Prefix for Pony commands
 let g:pony_prefix = "D"
+
+" Wether the file will open in new tab or not
+let g:pony_open_in_new_tab = 0
+
 " helper for making command names, encapsulating the command format
 function! s:RealCommandName(CommandName)
   return g:pony_prefix . a:CommandName
@@ -98,7 +102,11 @@ function! s:DjangoGoto(app_label, name)
 
   " Edit file if it exists
   if filereadable(l:filename)
-    execute "edit " . l:filename
+    if g:pony_open_in_new_tab == 0
+      execute "edit " . l:filename
+    else
+      execute "tabnew " . l:filename
+    endif
   else
     call s:Error("File " . l:filename . " does not exists")
   endif
