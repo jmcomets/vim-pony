@@ -139,7 +139,7 @@ function! s:DjangoManage(arguments)
   let l:cmd = "!"
   if !g:pony_display_colors || has("gui_running")
     " Don't display colors
-    let l:cmd .= "export DJANGO_COLORS=nocolor &&"
+    let l:cmd .= "set DJANGO_COLORS=nocolor &&"
   end
   execute l:cmd . " " . s:manage_cmd() . " " . a:arguments
 endfunction
