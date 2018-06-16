@@ -11,8 +11,7 @@ let g:loaded_pony = 1
 
 " Configuration for "manage" script name
 if !exists('g:pony_manage_filename')
-" let g:pony_manage_filename = findfile("manage.py", ".;")
-  let g:pony_manage_filename = "manage.py"
+  let g:pony_manage_filename = findfile("manage.py")
 endif
 
 " function to wrap the check on this file
@@ -137,11 +136,15 @@ function! s:DjangoManage(arguments)
   endif
 
   " Build manage command from arguments
-  let l:cmd = "!start"
-  if !g:pony_display_colors || has("gui_running")
-    " Don't display colors
-"    let l:cmd .= "set DJANGO_COLORS=nocolor &&"
-  end
+  let l:cmd = "!"
+  if has("win32")
+    let l:cmd .= " start /B "
+  else
+    if !g:pony_display_colors || has("gui_running")
+      " Don't display colors
+      let l:cmd .= "export DJANGO_COLORS=nocolor &&"
+    endif
+  endif
   execute l:cmd . " " . s:manage_cmd() . " " . a:arguments
 endfunction
 
